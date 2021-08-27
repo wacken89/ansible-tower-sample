@@ -1,0 +1,48 @@
+- name: Test Playbook
+  hosts: all
+  tasks:
+    - name: Hello Message
+      debug:
+        msg: "Hello World!"
+    
+    - name: Uninstalling Software
+      yum: 
+        name: "{{ item }}" 
+        state: absent
+      loop:
+          - sendmail
+          - exim
+          - httpd
+      tags: 
+        - basic_software
+
+    - name: Installing epel repo
+      yum: 
+        name: epel-release 
+        state: latest 
+        update_cache: yes
+      tags: 
+        - basic_software
+
+    - name: Installing basic packages
+      yum: 
+        name: "{{ item.package }}" 
+        state: "{{ item.version }}" 
+        update_cache: yes
+      loop:
+          - { package: 'yum-utils', version: 'latest' }
+          - { package: 'net-tools', version: 'latest' }
+          - { package: 'cronie', version: 'latest' }
+          - { package: 'nano', version: 'latest' }
+          - { package: 'vim', version: 'latest' }
+          - { package: 'bind-utils', version: 'latest' }
+          - { package: 'git', version: 'latest' }
+          - { package: 'python-passlib', version: 'latest' }
+          - { package: 'telnet', version: 'latest' }
+          - { package: 'wget', version: 'latest' }
+          - { package: 'mtr', version: 'latest' }
+          - { package: 'python-pip', version: 'latest' }
+          - { package: 'libselinux-python', version: 'latest' }
+          - { package: 'nfs-utils', version: 'latest'}
+      tags: 
+        - basic_software
