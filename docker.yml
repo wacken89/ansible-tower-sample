@@ -1,75 +1,77 @@
----
-- name: Add Docker repo
-  command: >
-    yum-config-manager 
-      --add-repo 
-      https://download.docker.com/linux/centos/docker-ce.repo
-  tags:
-    - docker
+- name: Docker Playbook
+  hosts: all
+  tasks:
+    - name: Add Docker repo
+      command: >
+        yum-config-manager 
+          --add-repo 
+          https://download.docker.com/linux/centos/docker-ce.repo
+      tags:
+        - docker
 
-- name: Add Nvidia Docker repo
-  copy:
-    src: nvidia-docker.repo
-    dest: /etc/yum.repos.d/nvidia-docker.repo
-  tags:
-    - docker
-  when: "'gpu' in inventory_hostname"
+    - name: Add Nvidia Docker repo
+      copy:
+        src: nvidia-docker.repo
+        dest: /etc/yum.repos.d/nvidia-docker.repo
+      tags:
+        - docker
+      when: "'gpu' in inventory_hostname"
 
-- name: Install Docker pre req packages
-  yum: 
-    name: "{{ item.package }}" 
-    state: "{{ item.version }}" 
-    update_cache: yes
-  loop:
-    - { package: 'yum-utils', version: 'latest' }
-    - { package: 'device-mapper-persistent-data', version: 'latest' }
-    - { package: 'lvm2', version: 'latest' }
-    - { package: 'containerd.io', version: 'latest' }
-    - { package: 'python-pip', version: 'latest' }
-    - { package: 'python3-pip', version: 'latest' }
-    - { package: 'python-devel', version: 'latest' }
-    - { package: 'gcc', version: 'latest' }
-  tags:
-    - docker
+    - name: Install Docker pre req packages
+      yum: 
+        name: "{{ item.package }}" 
+        state: "{{ item.version }}" 
+        update_cache: yes
+      loop:
+        - { package: 'yum-utils', version: 'latest' }
+        - { package: 'device-mapper-persistent-data', version: 'latest' }
+        - { package: 'lvm2', version: 'latest' }
+        - { package: 'containerd.io', version: 'latest' }
+        - { package: 'python-pip', version: 'latest' }
+        - { package: 'python3-pip', version: 'latest' }
+        - { package: 'python-devel', version: 'latest' }
+        - { package: 'gcc', version: 'latest' }
+      tags:
+        - docker
 
-- name: Installing Docker basic packages
-  yum: 
-    name: "{{ item.package }}-{{ dockerVersion }}" 
-    state: "{{ item.version }}" 
-    update_cache: yes
-  loop:
-    - { package: 'docker-ce', version: 'latest' }
-    - { package: 'docker-ce-cli', version: 'latest' }
-  tags:
-    - docker
+    - name: Installing Docker basic packages
+      yum: 
+        name: "{{ item.package }}-{{ dockerVersion }}" 
+        state: "{{ item.version }}" 
+        update_cache: yes
+      loop:
+        - { package: 'docker-ce', version: 'latest' }
+        - { package: 'docker-ce-cli', version: 'latest' }
+      tags:
+        - docker
 
-- name: Install Nvidia Docker packages
-  yum:
-    name: "{{ item.package }}" 
-    state: "{{ item.version }}" 
-    update_cache: yes
-  loop:
-    - { package: 'nvidia-container-toolkit', version: 'latest' }
-    - { package: 'nvidia-docker2', version: 'latest' }
-  tags:
-    - docker
-  when: "'gpu' in inventory_hostname"
+    - name: Install Nvidia Docker packages
+      yum:
+        name: "{{ item.package }}" 
+        state: "{{ item.version }}" 
+        update_cache: yes
+      loop:
+        - { package: 'nvidia-container-toolkit', version: 'latest' }
+        - { package: 'nvidia-docker2', version: 'latest' }
+      tags:
+        - docker
+      when: "'gpu' in inventory_hostname"
 
-- name: Enable and start Docker service
-  systemd:
-    name: docker
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  tags:
-    - docker
+    - name: Enable and start Docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      tags:
+        - docker
 
-- name: Create directory /etc/docker/
-  file: 
-    path: /etc/docker/
-    state: directory 
-    owner: root 
-    group: root
-    mode: 0755
-  tags:
-    - docker
+    - name: Create directory /etc/docker/
+      file: 
+        path: /etc/docker/
+        state: directory 
+        owner: root 
+        group: root
+        mode: 0755
+      tags:
+        - docker
